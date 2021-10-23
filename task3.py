@@ -3,12 +3,15 @@ import datetime
 
 def logger_decorator_with_params(p):
     def logger_decorator(function):
-        function()
-        time = datetime.datetime.now()
-        function_name = function.__name__
-        log_information_for_writing = f"{function_name} {time}\n"
-        with open(f'{p}/log_file.txt', 'a') as log_file:
-            log_file.write(log_information_for_writing)
+        def wrapper(*args):
+            time = datetime.datetime.now()
+            function_name = function.__name__
+            log_information_for_writing = f"{function_name} {time}\n"
+            with open(f'{p}/log_file.txt', 'a') as log_file:
+                log_file.write(log_information_for_writing)
+            return function(*args)
+        return wrapper
+
     return logger_decorator
 
 
@@ -27,12 +30,14 @@ directories = {
 }
 
 
+@logger_decorator_with_params(path_to_logs)
 def get_people(doc_num):
     for i in documents:
         if i["number"] == doc_num:
             print(i["name"])
 
 
+@logger_decorator_with_params(path_to_logs)
 def get_shelf(doc_num):
     list_of_documents = [x['number'] for x in documents]
     if doc_num not in list_of_documents:
@@ -43,6 +48,7 @@ def get_shelf(doc_num):
                 print(i)
 
 
+@logger_decorator_with_params(path_to_logs)
 def show_list():
     for i in documents:
         type = i['type']
@@ -51,6 +57,7 @@ def show_list():
         print(f'{type} "{number}" "{name}"')
 
 
+@logger_decorator_with_params(path_to_logs)
 def add_document(type, number, name, shell):
     if shell not in directories.keys():
         print('Такой полки нет!')
@@ -60,6 +67,7 @@ def add_document(type, number, name, shell):
         directories[shell].append(new_doc['number'])
 
 
+@logger_decorator_with_params(path_to_logs)
 def del_document(doc_num):
     list_of_documents = [x['number'] for x in documents]
     if doc_num not in list_of_documents:
@@ -73,6 +81,7 @@ def del_document(doc_num):
                         j.remove(doc_num)
 
 
+@logger_decorator_with_params(path_to_logs)
 def move_document(doc_num, new_shelf):
     list_of_documents = [x['number'] for x in documents]
     if doc_num not in list_of_documents:
@@ -86,6 +95,7 @@ def move_document(doc_num, new_shelf):
         directories[new_shelf].append(doc_num)
 
 
+@logger_decorator_with_params(path_to_logs)
 def add_shelf(num_shelf):
     if num_shelf in directories.keys():
         print('Такая полка уже есть!')
@@ -93,6 +103,7 @@ def add_shelf(num_shelf):
         directories[num_shelf] = []
 
 
+@logger_decorator_with_params(path_to_logs)
 def main_menu(comand):
     if comand == 'p':
         get_people(input('Введите номер документа: '))
